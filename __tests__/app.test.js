@@ -30,7 +30,7 @@ describe("/api/topics", () => {
                 .get("/api/topics")
                 .expect(200)
                 .then(({ body: { topics } }) => {
-                    expect(topics.length).toBe(3)
+                    expect(topics).toHaveLength(3)
                     topics.forEach(topic => {
                         expect(topic).toMatchObject({
                             description: expect.any(String),
@@ -38,6 +38,35 @@ describe("/api/topics", () => {
                         })
                     })
                 })
+        })
+    })
+})
+
+describe("/api/articles", () => {
+    describe("GET", () => {
+        test("200: Responds with an array of all article objects", () => {
+            return request(app)
+            .get("/api/articles")
+            .expect(200)
+            .then (({ body: { articles }}) => {
+                expect(articles).toHaveLength(13)
+                articles.forEach( article => {
+                    expect(article).toMatchObject({
+                        article_id: expect.any(Number),
+                        title: expect.any(String),
+                        topic: expect.any(String),
+                        author: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: expect.any(Number),
+                        comment_count: expect.any(Number)
+                    })
+                })
+                // TODO - I suspect this passing might be a coincidence ATM, investigate safety of sorting dates as string
+                expect(articles).toBeSortedBy('created_at', { descending: true })
+                expect(articles.every( article => {
+                    return article.hasOwnProperty("body") === false
+                })).toBe(true)
+            })
         })
     })
 })
