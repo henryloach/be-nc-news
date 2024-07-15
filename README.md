@@ -1,8 +1,10 @@
 # Northcoders News API
 
-For instructions, please head over to [L2C NC News](https://l2c.northcoders.com/courses/be/nc-news).
+Those wishing to create a copy of this project should create .env.test and .env.development files setting the database names for their enviroment containing:
 
+PGDATABASE=yourdatabasename
 
+Install dependecies with npm install.
 
 --- 
 
