@@ -11,7 +11,7 @@ afterAll(() => db.end())
 
 describe("/api/topics", () => {
     describe("GET", () => {
-        test("200: responds with a body containing all topics", () => {
+        test("200: responds with a body containing an array of all topics.", () => {
             return request(app)
                 .get("/api/topics")
                 .expect(200)
@@ -24,7 +24,7 @@ describe("/api/topics", () => {
 })
 
 describe("Bad endpoint", () => {
-    test("404: responds with a message 'Bad endpoint'", () => {
+    test("404: responds with a message 'Bad endpoint'.", () => {
         return request(app)
             .get("/api/not-an-endpoint")
             .expect(404)
