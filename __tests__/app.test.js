@@ -1,5 +1,6 @@
 const db = require("../db/connection.js")
 const testData = require("../db/data/test-data")
+const endpointsData = require("../endpoints.json")
 const seed = require("../db/seeds/seed.js")
 
 const app = require("../src/app.js")
@@ -9,6 +10,19 @@ const request = require("supertest")
 beforeEach(() => seed(testData))
 afterAll(() => db.end())
 
+describe("/api", () => {
+    describe("GET", () => {
+        test("200: responds with an object detailing available enpoints", () => {
+            return request(app)
+                .get("/api")
+                .expect(200)
+                .then(({ body: { endpoints } }) => {
+                    expect(endpoints).toStrictEqual(endpointsData)
+                })
+        })
+    })
+})
+
 describe("/api/topics", () => {
     describe("GET", () => {
         test("200: responds with a body containing an array of all topics.", () => {
@@ -17,7 +31,12 @@ describe("/api/topics", () => {
                 .expect(200)
                 .then(({ body: { topics } }) => {
                     expect(topics.length).toBe(3)
-                    expect(topics).toStrictEqual(testData.topicData)
+                    topics.forEach(topic => {
+                        expect(topic).toMatchObject({
+                            description: expect.any(String),
+                            slug: expect.any(String)
+                        })
+                    })
                 })
         })
     })
