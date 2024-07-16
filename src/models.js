@@ -81,3 +81,41 @@ exports.selectCommentsByArticleId = target_id => {
             return rows
         })
 }
+
+exports.insertCommentByArticleId = (target_id, comment) => {
+    const { username, body } = comment
+    // TODO refactor based on tuesdays lecture at some point
+    return db
+        .query(
+            `SELECT * FROM articles
+            WHERE article_id = $1;`,
+            [target_id]
+        )
+        .then(({ rows }) => {
+            if (rows.length === 0) {
+                return Promise.reject({
+                    status: 404,
+                    message: "No article matching requested id"
+                })
+            }
+        })
+        .then(() => {
+            return db.query(
+                `INSERT INTO comments (
+                    author,
+                    body,
+                    article_id
+                )
+                VALUES ( 
+                    $1,
+                    $2,
+                    $3
+                ) 
+                RETURNING *;`,
+                [username, body, target_id]
+            )
+        })
+        .then(({ rows }) => {
+            return rows[0]
+        })
+}

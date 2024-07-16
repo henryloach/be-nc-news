@@ -90,6 +90,7 @@ describe("/api/articles", () => {
 
 describe("/api/articles/:article_id", () => {
     describe("GET", () => {
+
         test("200: Responds with the requested article object.", () => {
             return request(app)
                 .get("/api/articles/2")
@@ -107,6 +108,7 @@ describe("/api/articles/:article_id", () => {
                     })
                 })
         })
+
         test("404: Well formed article id endpoint not found in database.", () => {
             return request(app)
                 .get("/api/articles/999")
@@ -115,6 +117,7 @@ describe("/api/articles/:article_id", () => {
                     expect(message).toBe("No article matching requested id")
                 })
         })
+
         test("400: Malformed article id endpoint.", () => {
             return request(app)
                 .get("/api/articles/not-an-id")
@@ -168,6 +171,7 @@ describe("/api/articles/:article_id/comments", () => {
                     expect(comments).toStrictEqual([])
                 })
         })
+
         test("404: Well formed article id endpoint not found in database.", () => {
             return request(app)
                 .get("/api/articles/999/comments")
@@ -176,12 +180,119 @@ describe("/api/articles/:article_id/comments", () => {
                     expect(message).toBe("No article matching requested id")
                 })
         })
+
         test("400: Malformed article id endpoint.", () => {
             return request(app)
                 .get("/api/articles/not-an-id/comments")
                 .expect(400)
                 .then(({ body: { message } }) => {
                     expect(message).toBe("Bad endpoint")
+                })
+        })
+    })
+
+    describe("POST", () => {
+
+        const validComment = {
+            username: "lurker",
+            body: "An elephant never forgets."
+        }
+
+        const commentWithNoBody = {
+            username: "lurker"
+        }
+
+        const commentWithNoUser = {
+            body: "An elephant never forgets."
+        }
+
+        const commentWithBadUser = {
+            username: "chris",
+            body: "An elephant never forgets."
+        }
+
+        const commentWithExtraProperty = {
+            username: "lurker",
+            body: "An elephant never forgets.",
+            extraProperty: "foo"
+        }
+
+        const expectedResponseObject = {
+            comment_id: 19,
+            body: "An elephant never forgets.",
+            article_id: 9,
+            author: "lurker",
+            votes: 0,
+            created_at: expect.any(String)
+        }
+
+        test("201: Inserts comment to database and responds with posted comment", () => {
+            return request(app)
+                .post("/api/articles/9/comments")
+                .send(validComment)
+                .expect(201)
+                .then(({ body: { newComment } }) => {
+                    expect(newComment).toMatchObject(expectedResponseObject)
+                })
+        })
+
+        test("404: Well formed article id endpoint not found in database.", () => {
+            return request(app)
+                .post("/api/articles/999/comments")
+                .send(validComment)
+                .expect(404)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("No article matching requested id")
+                })
+        })
+
+        test("400: Malformed article id endpoint.", () => {
+            return request(app)
+                .post("/api/articles/not-an-id/comments")
+                .send(validComment)
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad endpoint")
+                })
+        })
+
+        test("400: Required property missing from request object.", () => {
+            return Promise.all([
+                request(app)
+                    .post("/api/articles/9/comments")
+                    .send(commentWithNoBody)
+                    .expect(400)
+                    .then(({ body: { message } }) => {
+                        expect(message).toBe("Bad request: missing property")
+                    }),
+
+                request(app)
+                    .post("/api/articles/9/comments")
+                    .send(commentWithNoUser)
+                    .expect(400)
+                    .then(({ body: { message } }) => {
+                        expect(message).toBe("Bad request: missing property")
+                    })
+            ])
+        })
+
+        test("404: User does not exist", () => {
+            return request(app)
+                .post("/api/articles/9/comments")
+                .send(commentWithBadUser)
+                .expect(404)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("User not found")
+                })
+        })
+
+        test("201: Requests with extra properties are proccessed with extra properties ignored.", () => {
+            return request(app)
+                .post("/api/articles/9/comments")
+                .send(commentWithExtraProperty)
+                .expect(201)
+                .then(({ body: { newComment } }) => {
+                    expect(newComment).toMatchObject(expectedResponseObject)
                 })
         })
     })
