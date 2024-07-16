@@ -44,11 +44,17 @@ describe("/api/topics", () => {
 
 describe("/api/articles", () => {
     describe("GET", () => {
-        test("200: Responds with an array of all article objects", () => {
+
+        const getArticles = () => {
             return request(app)
                 .get("/api/articles")
                 .expect(200)
-                .then(({ body: { articles } }) => {
+                .then(({ body: { articles } }) => articles)
+        }
+
+        test("200: Responds with an array of all article objects.", () => {
+            return getArticles()
+                .then(articles => {
                     expect(articles).toHaveLength(13)
                     articles.forEach(article => {
                         expect(article).toMatchObject({
@@ -61,12 +67,23 @@ describe("/api/articles", () => {
                             comment_count: expect.any(Number)
                         })
                     })
+                })
+        })
+
+        test("200: Articles are sorted by 'created_at' in descending order.", () => {
+            return getArticles()
+                .then(articles => {
                     // TODO - I suspect this passing might be a coincidence ATM, investigate safety of sorting dates as string
                     expect(articles).toBeSortedBy('created_at', { descending: true })
-                    expect(articles.every(article => {
-                        return article.hasOwnProperty("body") === false
-                    })).toBe(true)
                 })
+        })
+
+        test("200: Articles do not have a body property.", () => {
+            return getArticles().then(articles => {
+                expect(articles.every(article => {
+                    return article.hasOwnProperty("body") === false
+                })).toBe(true)
+            })
         })
     })
 })
@@ -111,11 +128,17 @@ describe("/api/articles/:article_id", () => {
 
 describe("/api/articles/:article_id/comments", () => {
     describe("GET", () => {
-        test("200: Responds with an array of all comments of the requested article", () => {
+
+        const getComments = () => {
             return request(app)
                 .get("/api/articles/3/comments")
                 .expect(200)
-                .then(({ body: { comments } }) => {
+                .then(({ body: { comments } }) => comments)
+        }
+
+        test("200: Responds with an array of all comments of the requested article", () => {
+            return getComments()
+                .then(comments => {
                     expect(comments).toHaveLength(2)
                     comments.forEach(comment => {
                         expect(comment).toMatchObject({
@@ -127,9 +150,16 @@ describe("/api/articles/:article_id/comments", () => {
                             created_at: expect.any(String)
                         })
                     })
+                })
+        })
+
+        test("200: Comments are sorted by 'created_at' in descending order.", () => {
+            return getComments()
+                .then(comments => {
                     expect(comments).toBeSortedBy('created_at', { descending: true })
                 })
         })
+
         test("200: Responds with an empty array for articles with no comments", () => {
             return request(app)
                 .get("/api/articles/4/comments")
