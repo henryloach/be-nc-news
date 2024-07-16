@@ -127,6 +127,79 @@ describe("/api/articles/:article_id", () => {
                 })
         })
     })
+
+    describe("PATCH", () => {
+
+        const expectedResponseObject = {
+            article_id: 2,
+            title: "Sony Vaio; or, The Laptop",
+            topic: "mitch",
+            author: "icellusedkars",
+            body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
+            created_at: "2020-10-16T05:03:00.000Z",
+            votes: 10,
+            article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+        }
+
+        test("200: Responds with the updated article.", () => {
+            return request(app)
+                .patch("/api/articles/2")
+                .send({ inc_votes: 10 })
+                .expect(200)
+                .then(({ body: { updatedArticle } }) => {
+                    expect(updatedArticle).toMatchObject(expectedResponseObject)
+                })
+        })
+        test("404: Well formed article id endpoint not found in database.", () => {
+            return request(app)
+                .patch("/api/articles/999")
+                .send({ inc_votes: 10 })
+                .expect(404)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("No article matching requested id")
+                })
+        })
+
+        test("400: Malformed article id endpoint.", () => {
+            return request(app)
+                .patch("/api/articles/not-an-id")
+                .send({ inc_votes: 10 })
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad endpoint")
+                })
+        })
+
+        test("400: Required property missing from request object.", () => {
+            return request(app)
+                .patch("/api/articles/2")
+                .send({})
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad request: missing property")
+                })
+        })
+
+        test("400: Error if 'inc_votes' value cannot be parsed to a number.", () => {
+            return request(app)
+                .patch("/api/articles/2")
+                .send({ inc_votes: "cheese" })
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad request: 'inc_votes' value must be a number")
+                })
+        })
+
+        test("200: Requests with extra properties are proccessed with extra properties ignored.", () => {
+            return request(app)
+                .patch("/api/articles/2")
+                .send({ inc_votes: 10, extraProperty: "foo" })
+                .expect(200)
+                .then(({ body: { updatedArticle } }) => {
+                    expect(updatedArticle).toMatchObject(expectedResponseObject)
+                })
+        })
+    })
 })
 
 describe("/api/articles/:article_id/comments", () => {
@@ -139,7 +212,7 @@ describe("/api/articles/:article_id/comments", () => {
                 .then(({ body: { comments } }) => comments)
         }
 
-        test("200: Responds with an array of all comments of the requested article", () => {
+        test("200: Responds with an array of all comments of the requested article.", () => {
             return getComments()
                 .then(comments => {
                     expect(comments).toHaveLength(2)
@@ -298,13 +371,36 @@ describe("/api/articles/:article_id/comments", () => {
     })
 })
 
-describe("Bad endpoint", () => {
-    test("400: Responds with a message 'Bad endpoint'.", () => {
-        return request(app)
-            .get("/api/not-an-endpoint")
-            .expect(400)
-            .then(({ body: { message } }) => {
-                expect(message).toBe("Bad endpoint")
-            })
+describe("Bad endpoints", () => {
+    describe("GET", () => {
+
+        test("400: Responds with a message 'Bad endpoint'.", () => {
+            return request(app)
+                .get("/api/not-an-endpoint")
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad endpoint")
+                })
+        })
+    })
+    describe("POST", () => {
+        test("400: Responds with a message 'Bad endpoint'.", () => {
+            return request(app)
+                .post("/api/not-an-endpoint")
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad endpoint")
+                })
+        })
+    })
+    describe("PATCH", () => {
+        test("400: Responds with a message 'Bad endpoint'.", () => {
+            return request(app)
+                .patch("/api/not-an-endpoint")
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad endpoint")
+                })
+        })
     })
 })
