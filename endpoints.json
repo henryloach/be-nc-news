@@ -67,5 +67,17 @@
         }
       ]
     }
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "posts a comment for the requested id which is added to the database and responds with the posted comment",
+    "queries": [],
+    "exampleResponse": {
+      "comment_id": 19,
+      "body": "An elephant never forgets.",
+      "article_id": 9,
+      "author": "lurker",
+      "votes": 0,
+      "created_at": "2018-05-30T15:59:13.341Z"
+    }
   }
 }

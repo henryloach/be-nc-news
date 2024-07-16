@@ -1,7 +1,9 @@
-const { getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticleId } = require("./controllers.js")
+const { getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticleId, postCommentByArticleId } = require("./controllers.js")
 
 const express = require("express")
 const app = express()
+
+app.use(express.json())
 
 // Endpoints 
 
@@ -14,6 +16,7 @@ app.get("/api/articles", getArticles)
 app.get("/api/articles/:article_id", getArticleById)
 
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId)
+app.post("/api/articles/:article_id/comments", postCommentByArticleId)
 
 app.get("/api/*", (req, res) => {
     res.status(400).send({ message: "Bad endpoint" })
@@ -28,6 +31,12 @@ app.use((err, req, res, next) => {
     }
     if (code === "22P02") {
         res.status(400).send({ message: "Bad endpoint" })
+    }
+    if (code === "23502") {
+        res.status(400).send({ message: "Bad request: missing property"})
+    }
+    if (code === "23503") {
+        res.status(404).send({ message: "User not found"})
     }
 })
 
