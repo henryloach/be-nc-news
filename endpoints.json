@@ -53,7 +53,7 @@
     }
   },
   "GET /api/articles/:article_id/comments": {
-    "description": "serves the comments of the article matching the requested id",
+    "description": "serves an array containing comments of the article matching the requested id",
     "queries": [],
     "exampleResponse": {
       "comments": [
