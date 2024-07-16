@@ -1,4 +1,4 @@
-const { getTopics, getEndpoints, getArticleById, getArticles } = require("./controllers.js")
+const { getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticleId } = require("./controllers.js")
 
 const express = require("express")
 const app = express()
@@ -12,6 +12,8 @@ app.get("/api/topics", getTopics)
 app.get("/api/articles", getArticles)
 
 app.get("/api/articles/:article_id", getArticleById)
+
+app.get("/api/articles/:article_id/comments", getCommentsByArticleId)
 
 app.get("/api/*", (req, res) => {
     res.status(400).send({ message: "Bad endpoint" })

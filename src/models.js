@@ -35,7 +35,7 @@ exports.selectArticles = () => {
         })
 }
 
-exports.selectArticleById = (target_id) => {
+exports.selectArticleById = target_id => {
     return db
         .query(
             `SELECT * FROM articles
@@ -50,5 +50,34 @@ exports.selectArticleById = (target_id) => {
                 })
             }
             return rows[0]
+        })
+}
+
+exports.selectCommentsByArticleId = target_id => {
+    // TODO refactor based on tuesdays lecture at some point
+    return db
+        .query(
+            `SELECT * FROM articles
+            WHERE article_id = $1;`,
+            [target_id]
+        )
+        .then(({ rows }) => {
+            if (rows.length === 0) {
+                return Promise.reject({
+                    status: 404,
+                    message: "No article matching requested id"
+                })
+            }
+        })
+        .then(() => {
+            return db.query(
+                `SELECT * FROM comments
+                WHERE article_id = $1
+                ORDER BY created_at DESC;`,
+                [target_id]
+            )
+        })
+        .then(({ rows }) => {
+            return rows
         })
 }
