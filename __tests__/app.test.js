@@ -46,27 +46,27 @@ describe("/api/articles", () => {
     describe("GET", () => {
         test("200: Responds with an array of all article objects", () => {
             return request(app)
-            .get("/api/articles")
-            .expect(200)
-            .then (({ body: { articles }}) => {
-                expect(articles).toHaveLength(13)
-                articles.forEach( article => {
-                    expect(article).toMatchObject({
-                        article_id: expect.any(Number),
-                        title: expect.any(String),
-                        topic: expect.any(String),
-                        author: expect.any(String),
-                        created_at: expect.any(String),
-                        votes: expect.any(Number),
-                        comment_count: expect.any(Number)
+                .get("/api/articles")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toHaveLength(13)
+                    articles.forEach(article => {
+                        expect(article).toMatchObject({
+                            article_id: expect.any(Number),
+                            title: expect.any(String),
+                            topic: expect.any(String),
+                            author: expect.any(String),
+                            created_at: expect.any(String),
+                            votes: expect.any(Number),
+                            comment_count: expect.any(Number)
+                        })
                     })
+                    // TODO - I suspect this passing might be a coincidence ATM, investigate safety of sorting dates as string
+                    expect(articles).toBeSortedBy('created_at', { descending: true })
+                    expect(articles.every(article => {
+                        return article.hasOwnProperty("body") === false
+                    })).toBe(true)
                 })
-                // TODO - I suspect this passing might be a coincidence ATM, investigate safety of sorting dates as string
-                expect(articles).toBeSortedBy('created_at', { descending: true })
-                expect(articles.every( article => {
-                    return article.hasOwnProperty("body") === false
-                })).toBe(true)
-            })
         })
     })
 })
@@ -101,6 +101,54 @@ describe("/api/articles/:article_id", () => {
         test("400: Malformed article id endpoint.", () => {
             return request(app)
                 .get("/api/articles/not-an-id")
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad endpoint")
+                })
+        })
+    })
+})
+
+describe("/api/articles/:article_id/comments", () => {
+    describe("GET", () => {
+        test("200: Responds with an array of all comments of the requested article", () => {
+            return request(app)
+                .get("/api/articles/3/comments")
+                .expect(200)
+                .then(({ body: { comments } }) => {
+                    expect(comments).toHaveLength(2)
+                    comments.forEach(comment => {
+                        expect(comment).toMatchObject({
+                            comment_id: expect.any(Number),
+                            body: expect.any(String),
+                            article_id: expect.any(Number),
+                            author: expect.any(String),
+                            votes: expect.any(Number),
+                            created_at: expect.any(String)
+                        })
+                    })
+                    expect(comments).toBeSortedBy('created_at', { descending: true })
+                })
+        })
+        test("200: Responds with an empty array for articles with no comments", () => {
+            return request(app)
+                .get("/api/articles/4/comments")
+                .expect(200)
+                .then(({ body: { comments } }) => {
+                    expect(comments).toStrictEqual([])
+                })
+        })
+        test("404: Well formed article id endpoint not found in database.", () => {
+            return request(app)
+                .get("/api/articles/999/comments")
+                .expect(404)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("No article matching requested id")
+                })
+        })
+        test("400: Malformed article id endpoint.", () => {
+            return request(app)
+                .get("/api/articles/not-an-id/comments")
                 .expect(400)
                 .then(({ body: { message } }) => {
                     expect(message).toBe("Bad endpoint")
