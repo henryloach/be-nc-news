@@ -1,4 +1,4 @@
-const { getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticleId, postCommentByArticleId, patchArticleById, deleteCommentById, getUsers, getUserByName } = require("./controllers.js")
+const { getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticleId, postCommentByArticleId, patchArticleById, deleteCommentById, getUsers, getUserByName, patchCommentById } = require("./controllers.js")
 
 const express = require("express")
 const app = express()
@@ -20,6 +20,7 @@ app.post("/api/articles/:article_id/comments", postCommentByArticleId)
 app.get("/api/users", getUsers)
 app.get("/api/users/:username", getUserByName)
 
+app.patch("/api/comments/:comment_id", patchCommentById)
 app.delete("/api/comments/:comment_id", deleteCommentById)
 
 //

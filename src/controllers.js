@@ -1,4 +1,4 @@
-const { selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId, insertCommentByArticleId, updateArticleById, deleteCommentRowById, selectUsers, selectUserByName } = require("./models.js")
+const { selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId, insertCommentByArticleId, updateArticleById, deleteCommentRowById, selectUsers, selectUserByName, updateCommentById} = require("./models.js")
 const endpoints = require("../endpoints.json")
 const { articleData } = require("../db/data/test-data/index.js")
 
@@ -85,6 +85,17 @@ exports.getUserByName = (req, res, next) => {
     selectUserByName(username)
         .then(user => {
             res.status(200).send({ user })
+        })
+        .catch(err => {
+            next(err)
+        })
+}
+
+exports.patchCommentById = (req, res, next) => {
+    const { comment_id } = req.params
+    updateCommentById(comment_id, req.body)
+        .then(updatedComment => {
+            res.status(200).send({ updatedComment })
         })
         .catch(err => {
             next(err)
