@@ -1,4 +1,4 @@
-const { selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId, insertCommentByArticleId, updateArticleById } = require("./models.js")
+const { selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId, insertCommentByArticleId, updateArticleById, deleteCommentRowById } = require("./models.js")
 const endpoints = require("../endpoints.json")
 const { articleData } = require("../db/data/test-data/index.js")
 
@@ -46,6 +46,18 @@ exports.patchArticleById = (req, res, next) => {
         .catch(err => {
             next(err)
         })
+}
+
+exports.deleteCommentById = (req, res, next) => {
+    const { comment_id } = req.params
+    deleteCommentRowById(comment_id)
+        .then(() => {
+            res.status(204).send()
+        })
+        .catch(err => {
+            next(err)
+        })
+
 }
 
 exports.getCommentsByArticleId = (req, res, next) => {

@@ -1,4 +1,4 @@
-const { getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticleId, postCommentByArticleId, patchArticleById } = require("./controllers.js")
+const { getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticleId, postCommentByArticleId, patchArticleById, deleteCommentById } = require("./controllers.js")
 
 const express = require("express")
 const app = express()
@@ -16,18 +16,14 @@ app.get("/api/articles", getArticles)
 app.get("/api/articles/:article_id", getArticleById)
 app.patch("/api/articles/:article_id", patchArticleById)
 
+app.delete("/api/comments/:comment_id", deleteCommentById)
+
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId)
 app.post("/api/articles/:article_id/comments", postCommentByArticleId)
 
 //
 
-app.get("/api/*", (req, res) => {
-    res.status(400).send({ message: "Bad endpoint" })
-})
-app.post("/api/*", (req, res) => {
-    res.status(400).send({ message: "Bad endpoint" })
-})
-app.patch("/api/*", (req, res) => {
+app.all("/api/*", (req, res) => {
     res.status(400).send({ message: "Bad endpoint" })
 })
 
