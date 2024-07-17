@@ -174,52 +174,6 @@ describe("/api/articles", () => {
     })
 })
 
-describe("/api/users", () => {
-    describe("GET", () => {
-        test("200: Responds with an array of all user objects", () => {
-            return request(app)
-                .get("/api/users")
-                .expect(200)
-                .then(({ body: { users } }) => {
-                    expect(users).toHaveLength(testData.userData.length)
-                    users.forEach(user => {
-                        expect(user).toMatchObject({
-                            username: expect.any(String),
-                            name: expect.any(String),
-                            avatar_url: expect.any(String)
-                        })
-                    })
-                })
-        })
-    })
-})
-
-describe("/api/users/:username", () => {
-    describe("GET", () => {
-        test("200: Responds with the requested user object.", () => {
-            return request(app)
-                .get("/api/users/lurker")
-                .expect(200)
-                .then(({ body: { user } }) => {
-                    expect(user).toMatchObject({
-                        username: 'lurker',
-                        name: 'do_nothing',
-                        avatar_url: 'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png'
-                    })
-                })
-        })
-
-        test("404: Valid user endpoint not found in database.", () => {
-            return request(app)
-                .get("/api/users/not-a-user")
-                .expect(404)
-                .then(({ body: { message } }) => {
-                    expect(message).toBe("No user matching requested username")
-                })
-        })
-    })
-})
-
 describe("/api/articles/:article_id", () => {
     describe("GET", () => {
 
@@ -499,6 +453,52 @@ describe("/api/articles/:article_id/comments", () => {
                 .expect(201)
                 .then(({ body: { newComment } }) => {
                     expect(newComment).toMatchObject(expectedResponseObject)
+                })
+        })
+    })
+})
+
+describe("/api/users", () => {
+    describe("GET", () => {
+        test("200: Responds with an array of all user objects", () => {
+            return request(app)
+                .get("/api/users")
+                .expect(200)
+                .then(({ body: { users } }) => {
+                    expect(users).toHaveLength(testData.userData.length)
+                    users.forEach(user => {
+                        expect(user).toMatchObject({
+                            username: expect.any(String),
+                            name: expect.any(String),
+                            avatar_url: expect.any(String)
+                        })
+                    })
+                })
+        })
+    })
+})
+
+describe("/api/users/:username", () => {
+    describe("GET", () => {
+        test("200: Responds with the requested user object.", () => {
+            return request(app)
+                .get("/api/users/lurker")
+                .expect(200)
+                .then(({ body: { user } }) => {
+                    expect(user).toMatchObject({
+                        username: 'lurker',
+                        name: 'do_nothing',
+                        avatar_url: 'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png'
+                    })
+                })
+        })
+
+        test("404: Valid user endpoint not found in database.", () => {
+            return request(app)
+                .get("/api/users/not-a-user")
+                .expect(404)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("No user matching requested username")
                 })
         })
     })

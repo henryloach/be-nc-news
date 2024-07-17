@@ -26,27 +26,6 @@ exports.getArticles = (req, res, next) => {
         })
 }
 
-exports.getUsers = (req, res, next) => {
-    selectUsers()
-        .then(users => {
-            res.status(200).send({ users })
-        })
-        .catch(err => {
-            next(err)
-        })
-}
-
-exports.getUserByName = (req, res, next) => {
-    const { username } = req.params
-    selectUserByName(username)
-        .then(user => {
-            res.status(200).send({ user })
-        })
-        .catch(err => {
-            next(err)
-        })
-}
-
 exports.getArticleById = (req, res, next) => {
     const { article_id } = req.params
     selectArticleById(article_id)
@@ -69,18 +48,6 @@ exports.patchArticleById = (req, res, next) => {
         })
 }
 
-exports.deleteCommentById = (req, res, next) => {
-    const { comment_id } = req.params
-    deleteCommentRowById(comment_id)
-        .then(() => {
-            res.status(204).send()
-        })
-        .catch(err => {
-            next(err)
-        })
-
-}
-
 exports.getCommentsByArticleId = (req, res, next) => {
     const { article_id } = req.params
     selectCommentsByArticleId(article_id)
@@ -101,4 +68,37 @@ exports.postCommentByArticleId = (req, res, next) => {
         .catch(err => {
             next(err)
         })
+}
+
+exports.getUsers = (req, res, next) => {
+    selectUsers()
+        .then(users => {
+            res.status(200).send({ users })
+        })
+        .catch(err => {
+            next(err)
+        })
+}
+
+exports.getUserByName = (req, res, next) => {
+    const { username } = req.params
+    selectUserByName(username)
+        .then(user => {
+            res.status(200).send({ user })
+        })
+        .catch(err => {
+            next(err)
+        })
+}
+
+exports.deleteCommentById = (req, res, next) => {
+    const { comment_id } = req.params
+    deleteCommentRowById(comment_id)
+        .then(() => {
+            res.status(204).send()
+        })
+        .catch(err => {
+            next(err)
+        })
+
 }
