@@ -194,6 +194,32 @@ describe("/api/users", () => {
     })
 })
 
+describe("/api/users/:username", () => {
+    describe("GET", () => {
+        test("200: Responds with the requested user object.", () => {
+            return request(app)
+                .get("/api/users/lurker")
+                .expect(200)
+                .then(({ body: { user } }) => {
+                    expect(user).toMatchObject({
+                        username: 'lurker',
+                        name: 'do_nothing',
+                        avatar_url: 'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png'
+                    })
+                })
+        })
+
+        test("404: Valid user endpoint not found in database.", () => {
+            return request(app)
+                .get("/api/users/not-a-user")
+                .expect(404)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("No user matching requested username")
+                })
+        })
+    })
+})
+
 describe("/api/articles/:article_id", () => {
     describe("GET", () => {
 

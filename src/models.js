@@ -92,6 +92,24 @@ exports.selectUsers = () => {
         })
 }
 
+exports.selectUserByName = target_name => {
+    return db
+        .query(
+            `SELECT * FROM users
+            WHERE username = $1`,
+            [target_name]
+        )
+        .then(({ rows }) => {
+            if (rows.length === 0) {
+                return Promise.reject({
+                    status: 404,
+                    message: "No user matching requested username"
+                })
+            }
+            return rows[0]
+        })
+}
+
 exports.selectArticleById = target_id => {
     return db
         .query(
