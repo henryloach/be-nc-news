@@ -54,8 +54,8 @@ exports.selectArticles = (query) => {
             const queryString = format(
                 `SELECT 
                     articles.article_id,
-                    title,
-                    topic,
+                    articles.title,
+                    articles.topic,
                     articles.author,
                     articles.created_at,
                     articles.votes,
@@ -65,7 +65,7 @@ exports.selectArticles = (query) => {
                 ON 
                     articles.article_id = comments.article_id
                 WHERE 
-                    topic LIKE %L
+                    articles.topic LIKE %L
                 GROUP BY 
                     articles.article_id
                 ORDER BY
@@ -95,8 +95,24 @@ exports.selectUsers = () => {
 exports.selectArticleById = target_id => {
     return db
         .query(
-            `SELECT * FROM articles
-            WHERE article_id = $1;`,
+            `SELECT 
+                    articles.article_id,
+                    articles.title,
+                    articles.topic,
+                    articles.author,
+                    articles.body,
+                    articles.created_at,
+                    articles.votes,
+                    articles.article_img_url,
+                    COUNT(comment_id) AS comment_count
+                FROM 
+                    articles LEFT JOIN comments
+                ON 
+                    articles.article_id = comments.article_id
+                WHERE 
+                    articles.article_id = $1
+                GROUP BY 
+                    articles.article_id;`,
             [target_id]
         )
         .then(({ rows }) => {

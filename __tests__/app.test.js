@@ -117,23 +117,23 @@ describe("/api/articles", () => {
 
         test("200: ?topic=cats \tResponds with articles array filtered by topic.", () => {
             return request(app)
-            .get("/api/articles?topic=cats")
-            .expect(200)
-            .then(( { body: { articles }}) => {
-                expect(articles).toHaveLength(1)
-                articles.forEach( article => {
-                    expect(article.topic).toBe("cats")
+                .get("/api/articles?topic=cats")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toHaveLength(1)
+                    articles.forEach(article => {
+                        expect(article.topic).toBe("cats")
+                    })
                 })
-            })
         })
 
         test("200: ?topic=lizards \tResponds with an empty articles array for topic values not in the database.", () => {
             return request(app)
-            .get("/api/articles?topic=lizards")
-            .expect(200)
-            .then(( { body: { articles }}) => {
-                expect(articles).toStrictEqual([])
-            })
+                .get("/api/articles?topic=lizards")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toStrictEqual([])
+                })
         })
 
         test("400: ?sort_by=invalid \tInvalid 'sort_by' query value.", () => {
@@ -156,12 +156,11 @@ describe("/api/articles", () => {
 
         test("400: ?invalid=anything \tInvalid query field.", () => {
             return request(app)
-            .get("/api/articles?invalid=anything")
-            .expect(400)
-            .then(({body : {message}}) => {
-                expect(message).toBe("Bad request: invalid query field")
-
-            })
+                .get("/api/articles?invalid=anything")
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad request: invalid query field")
+                })
         })
     })
 })
@@ -191,18 +190,19 @@ describe("/api/articles/:article_id", () => {
 
         test("200: Responds with the requested article object.", () => {
             return request(app)
-                .get("/api/articles/2")
+                .get("/api/articles/9")
                 .expect(200)
                 .then(({ body: { article } }) => {
                     expect(article).toMatchObject({
-                        article_id: 2,
-                        title: "Sony Vaio; or, The Laptop",
+                        article_id: 9,
+                        title: "They're not exactly dogs, are they?",
                         topic: "mitch",
-                        author: "icellusedkars",
-                        body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
-                        created_at: "2020-10-16T05:03:00.000Z",
+                        author: "butter_bridge",
+                        body: "Well? Think about it.",
+                        created_at: "2020-06-06T09:10:00.000Z",
+                        article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
                         votes: 0,
-                        article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+                        comment_count: 2
                     })
                 })
         })
