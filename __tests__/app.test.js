@@ -115,6 +115,27 @@ describe("/api/articles", () => {
             }
         }
 
+        test("200: ?topic=cats \tResponds with articles array filtered by topic.", () => {
+            return request(app)
+            .get("/api/articles?topic=cats")
+            .expect(200)
+            .then(( { body: { articles }}) => {
+                expect(articles).toHaveLength(1)
+                articles.forEach( article => {
+                    expect(article.topic).toBe("cats")
+                })
+            })
+        })
+
+        test("200: ?topic=lizards \tResponds with an empty articles array for topic values not in the database.", () => {
+            return request(app)
+            .get("/api/articles?topic=lizards")
+            .expect(200)
+            .then(( { body: { articles }}) => {
+                expect(articles).toStrictEqual([])
+            })
+        })
+
         test("400: ?sort_by=invalid \tInvalid 'sort_by' query value.", () => {
             return request(app)
                 .get("/api/articles?sort_by=invalid")

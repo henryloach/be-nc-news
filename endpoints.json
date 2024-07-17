@@ -19,15 +19,15 @@
     "queries": [
       {
         "field": "author",
-        "values": []
+        "greenlist": null
       },
       {
         "field": "topic",
-        "values": []
+        "greenlist": null
       },
       {
         "field": "sort_by",
-        "values": [
+        "greenlist": [
           "created_at",
           "votes",
           "article_id",
@@ -38,7 +38,7 @@
       },
       {
         "field": "order",
-        "values": [
+        "greenlist": [
           "asc",
           "desc"
         ]
