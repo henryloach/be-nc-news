@@ -371,6 +371,40 @@ describe("/api/articles/:article_id/comments", () => {
     })
 })
 
+describe("/api/comments/:comment_id", () => {
+    describe("DELETE", () => {
+        test("204: Deletes the comment and responds with no content", () => {
+            return request(app)
+                .delete("/api/comments/1")
+                .expect(204)
+                // check it's deleted by trying to delete it again?
+                .then(() => {
+                    return request(app)
+                        .delete("/api/comments/1")
+                        .expect(404)
+                })
+        })
+
+        test("404: Well formed comment id endpoint not found in database.", () => {
+            return request(app)
+                .delete("/api/comments/999")
+                .expect(404)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("No comment matching requested id")
+                })
+        })
+
+        test("400: Malformed comment id endpoint.", () => {
+            return request(app)
+                .delete("/api/comments/not-an-endpoint")
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad endpoint")
+                })
+        })
+    })
+})
+
 describe("Bad endpoints", () => {
     describe("GET", () => {
 
@@ -397,6 +431,16 @@ describe("Bad endpoints", () => {
         test("400: Responds with a message 'Bad endpoint'.", () => {
             return request(app)
                 .patch("/api/not-an-endpoint")
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad endpoint")
+                })
+        })
+    })
+    describe("DELETE", () => {
+        test("400: Responds with a message 'Bad endpoint'.", () => {
+            return request(app)
+                .delete("/api/not-an-endpoint")
                 .expect(400)
                 .then(({ body: { message } }) => {
                     expect(message).toBe("Bad endpoint")

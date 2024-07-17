@@ -69,6 +69,10 @@
       }
     }
   },
+  "DELETE /api/comments/:comment_id": {
+    "description": "deletes the comment and responds with no content",
+    "queries": []
+  },
   "GET /api/articles/:article_id/comments": {
     "description": "serves an array containing comments of the article matching the requested id",
     "queries": [],
