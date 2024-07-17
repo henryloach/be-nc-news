@@ -83,7 +83,8 @@
         "body": "Text from the article..",
         "created_at": "2018-05-30T15:59:13.341Z",
         "votes": 0,
-        "article_img_url": "img url..."
+        "article_img_url": "img url...",
+        "comment_count": 6
       }
     }
   },

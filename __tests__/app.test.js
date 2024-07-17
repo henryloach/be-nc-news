@@ -136,6 +136,15 @@ describe("/api/articles", () => {
                 })
         })
 
+        test("200: ?topic=paper \tResponds with an empty articles array for topics with no articles.", () => {
+            return request(app)
+                .get("/api/articles?topic=paper")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toStrictEqual([])
+                })
+        })
+
         test("400: ?sort_by=invalid \tInvalid 'sort_by' query value.", () => {
             return request(app)
                 .get("/api/articles?sort_by=invalid")
