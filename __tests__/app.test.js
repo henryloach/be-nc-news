@@ -30,7 +30,7 @@ describe("/api/topics", () => {
                 .get("/api/topics")
                 .expect(200)
                 .then(({ body: { topics } }) => {
-                    expect(topics).toHaveLength(3)
+                    expect(topics).toHaveLength(testData.topicData.length)
                     topics.forEach(topic => {
                         expect(topic).toMatchObject({
                             description: expect.any(String),
@@ -55,7 +55,7 @@ describe("/api/articles", () => {
         test("200: Responds with an array of all article objects.", () => {
             return getArticles()
                 .then(articles => {
-                    expect(articles).toHaveLength(13)
+                    expect(articles).toHaveLength(testData.articleData.length)
                     articles.forEach(article => {
                         expect(article).toMatchObject({
                             article_id: expect.any(Number),
@@ -84,6 +84,26 @@ describe("/api/articles", () => {
                     return article.hasOwnProperty("body") === false
                 })).toBe(true)
             })
+        })
+    })
+})
+
+describe("/api/users", () => {
+    describe("GET", () => {
+        test("200: Responds with an array of all user objects", () => {
+            return request(app)
+                .get("/api/users")
+                .expect(200)
+                .then(({ body: { users } }) => {
+                    expect(users).toHaveLength(testData.userData.length)
+                    users.forEach(user => {
+                        expect(user).toMatchObject({
+                            username: expect.any(String),
+                            name: expect.any(String),
+                            avatar_url: expect.any(String)
+                        })
+                    })
+                })
         })
     })
 })

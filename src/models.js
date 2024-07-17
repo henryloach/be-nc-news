@@ -35,6 +35,16 @@ exports.selectArticles = () => {
         })
 }
 
+exports.selectUsers = () => {
+    return db
+        .query(
+            `SELECT * FROM users`
+        )
+        .then(({ rows }) => {
+            return rows
+        })
+}
+
 exports.selectArticleById = target_id => {
     return db
         .query(

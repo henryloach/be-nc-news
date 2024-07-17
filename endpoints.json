@@ -36,6 +36,19 @@
       ]
     }
   },
+  "GET /api/users": {
+    "description": "serves an array of all users",
+    "queries": [],
+    "exampleResponse": {
+      "users": [
+        {
+          "username": "lurker",
+          "name": "do_nothing",
+          "avatar_url": "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png"
+        }
+      ]
+    }
+  },
   "GET /api/articles/:article_id": {
     "description": "serves the article object with the requested id",
     "queries": [],
@@ -55,7 +68,9 @@
   "PATCH /api/articles/:article_id": {
     "description": "increments the votes field of the article object matching the requested id responding with the updated object",
     "queries": [],
-    "exampleRequest" : { "inc_votes" : 10 },
+    "exampleRequest": {
+      "inc_votes": 10
+    },
     "exampleResponse": {
       "article": {
         "article_id": 5,
@@ -92,9 +107,9 @@
   "POST /api/articles/:article_id/comments": {
     "description": "posts a comment for the requested id which is added to the database and responds with the posted comment",
     "queries": [],
-    "exampleRequest": {  
-        "username": "lurker",
-        "body": "An elephant never forgets."
+    "exampleRequest": {
+      "username": "lurker",
+      "body": "An elephant never forgets."
     },
     "exampleResponse": {
       "comment_id": 19,
