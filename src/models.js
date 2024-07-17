@@ -1,4 +1,5 @@
 const db = require("../db/connection.js")
+const format = require("pg-format")
 
 exports.selectTopics = () => {
     return db
@@ -10,26 +11,66 @@ exports.selectTopics = () => {
         })
 }
 
-exports.selectArticles = () => {
+exports.selectArticles = (query) => {
+
     return db
-        .query(
-            `SELECT 
-                articles.article_id,
-                title,
-                topic,
-                articles.author,
-                articles.created_at,
-                articles.votes,
-                COUNT(comment_id) AS comment_count
-            FROM 
-                articles LEFT JOIN comments
-            ON 
-                articles.article_id = comments.article_id
-            GROUP BY 
-                articles.article_id
-            ORDER BY
-                articles.created_at DESC;`
-        )
+    .query(
+        `SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = 'articles';`
+    )
+    .then(({ rows }) => {
+            const { sort_by = 'created_at', order = 'desc' } = query
+            const queryParams = { sort_by, order }
+
+            const tableFields = rows.map(row => row.column_name)
+            const allowedQueries = {
+                sort_by: tableFields,
+                order: ["asc", "desc"]
+            }
+
+            // check fields
+            for (const field in query) {
+                if (!(field in allowedQueries)) {
+                    return Promise.reject({
+                        status: 400,
+                        message: "Bad request: invalid query field"
+                    })
+                }
+            }
+
+            // check values
+            for (const field in allowedQueries) {
+                if (!allowedQueries[field].includes(queryParams[field])) {
+                    return Promise.reject({ 
+                        status: 400, 
+                        message: `Bad request: invalid ${field} value` })
+                }
+            }
+
+            const queryString = format(
+                `SELECT 
+                    articles.article_id,
+                    title,
+                    topic,
+                    articles.author,
+                    articles.created_at,
+                    articles.votes,
+                    COUNT(comment_id) AS comment_count
+                FROM 
+                    articles LEFT JOIN comments
+                ON 
+                    articles.article_id = comments.article_id
+                GROUP BY 
+                    articles.article_id
+                ORDER BY
+                    articles.%s %s;`,
+                sort_by,
+                order
+            )
+
+            return db.query(queryString)
+        })
         .then(({ rows }) => {
             return rows
         })

@@ -85,6 +85,63 @@ describe("/api/articles", () => {
                 })).toBe(true)
             })
         })
+
+        const sortOptions = [
+            'created_at',
+            'votes',
+            'article_id',
+            'author',
+            'title',
+            'topic'
+        ]
+        const orderOptions = ["asc", "desc"]
+        const jestOptionMap = {
+            asc: { descending: false },
+            desc: { descending: true },
+        }
+        for (const sortOption of sortOptions) {
+            for (const orderOption of orderOptions) {
+                test(`200: ?sort_by=${sortOption}&order=${orderOption} \tArticles are sorted by field specified in 'sort_by' query.`, () => {
+                    return request(app)
+                        .get(`/api/articles?sort_by=${sortOption}&order=${orderOption}`)
+                        .expect(200)
+                        .then(({ body: { articles } }) => {
+                            expect(articles).toBeSortedBy(
+                                sortOption,
+                                jestOptionMap[orderOption]
+                            )
+                        })
+                })
+            }
+        }
+
+        test("400: ?sort_by=invalid \tInvalid 'sort_by' query value.", () => {
+            return request(app)
+                .get("/api/articles?sort_by=invalid")
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad request: invalid sort_by value")
+                })
+        })
+
+        test("400: ?order=invalid \tInvalid 'order' query value.", () => {
+            return request(app)
+                .get("/api/articles?order=invalid")
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad request: invalid order value")
+                })
+        })
+
+        test("400: ?invalid=anything \tInvalid query field.", () => {
+            return request(app)
+            .get("/api/articles?invalid=anything")
+            .expect(400)
+            .then(({body : {message}}) => {
+                expect(message).toBe("Bad request: invalid query field")
+
+            })
+        })
     })
 })
 
@@ -129,7 +186,7 @@ describe("/api/articles/:article_id", () => {
                 })
         })
 
-        test("404: Well formed article id endpoint not found in database.", () => {
+        test("404: Valid article id endpoint not found in database.", () => {
             return request(app)
                 .get("/api/articles/999")
                 .expect(404)
@@ -170,7 +227,7 @@ describe("/api/articles/:article_id", () => {
                     expect(updatedArticle).toMatchObject(expectedResponseObject)
                 })
         })
-        test("404: Well formed article id endpoint not found in database.", () => {
+        test("404: Valid article id endpoint not found in database.", () => {
             return request(app)
                 .patch("/api/articles/999")
                 .send({ inc_votes: 10 })
@@ -265,7 +322,7 @@ describe("/api/articles/:article_id/comments", () => {
                 })
         })
 
-        test("404: Well formed article id endpoint not found in database.", () => {
+        test("404: Valid article id endpoint not found in database.", () => {
             return request(app)
                 .get("/api/articles/999/comments")
                 .expect(404)
@@ -329,7 +386,7 @@ describe("/api/articles/:article_id/comments", () => {
                 })
         })
 
-        test("404: Well formed article id endpoint not found in database.", () => {
+        test("404: Valid article id endpoint not found in database.", () => {
             return request(app)
                 .post("/api/articles/999/comments")
                 .send(validComment)
@@ -405,7 +462,7 @@ describe("/api/comments/:comment_id", () => {
                 })
         })
 
-        test("404: Well formed comment id endpoint not found in database.", () => {
+        test("404: Valid comment id endpoint not found in database.", () => {
             return request(app)
                 .delete("/api/comments/999")
                 .expect(404)
