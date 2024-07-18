@@ -237,6 +237,7 @@ describe("/api/articles/:article_id", () => {
                     expect(updatedArticle).toMatchObject(expectedResponseObject)
                 })
         })
+
         test("404: Valid article id endpoint not found in database.", () => {
             return request(app)
                 .patch("/api/articles/999")
@@ -505,6 +506,77 @@ describe("/api/users/:username", () => {
 })
 
 describe("/api/comments/:comment_id", () => {
+
+    const expectedResponseObject =   {
+        comment_id: 2,
+        body: "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+        votes: 24,
+        author: "butter_bridge",
+        article_id: 1,
+        created_at: "2020-10-31T03:03:00.000Z",
+      }
+
+    describe("PATCH", () => {
+        test("200: Responds with the updated comment.", () => {
+            return request(app)
+                .patch("/api/comments/2")
+                .send({ inc_votes: 10 })
+                .expect(200)
+                .then(({ body: { updatedComment } }) => {
+                    expect(updatedComment).toMatchObject(expectedResponseObject)
+                })
+        })
+
+        test("404: Valid comment id endpoint not found in database.", () => {
+            return request(app)
+                .patch("/api/comments/999")
+                .send({ inc_votes: 10 })
+                .expect(404)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("No comment matching requested id")
+                })
+        })
+
+        test("400: Malformed comment id endpoint.", () => {
+            return request(app)
+                .patch("/api/comments/not-an-id")
+                .send({ inc_votes: 10 })
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad endpoint")
+                })
+        })
+
+        test("400: Required property missing from request object.", () => {
+            return request(app)
+                .patch("/api/comments/2")
+                .send({})
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad request: missing property")
+                })
+        })
+
+        test("400: Error if 'inc_votes' value cannot be parsed to a number.", () => {
+            return request(app)
+                .patch("/api/comments/2")
+                .send({ inc_votes: "cheese" })
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad request: 'inc_votes' value must be a number")
+                })
+        })
+
+        test("200: Requests with extra properties are proccessed with extra properties ignored.", () => {
+            return request(app)
+                .patch("/api/comments/2")
+                .send({ inc_votes: 10, extraProperty: "foo" })
+                .expect(200)
+                .then(({ body: { updatedComment } }) => {
+                    expect(updatedComment).toMatchObject(expectedResponseObject)
+                })
+        })
+    })
     describe("DELETE", () => {
         test("204: Deletes the comment and responds with no content", () => {
             return request(app)
