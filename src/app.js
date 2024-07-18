@@ -1,4 +1,4 @@
-const { getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticleId, postCommentByArticleId, patchArticleById, deleteCommentById, getUsers, getUserByName, patchCommentById } = require("./controllers.js")
+const { getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticleId, postCommentByArticleId, patchArticleById, deleteCommentById, getUsers, getUserByName, patchCommentById, postArticle } = require("./controllers.js")
 
 const express = require("express")
 const app = express()
@@ -12,6 +12,7 @@ app.get("/api", getEndpoints)
 app.get("/api/topics", getTopics)
 
 app.get("/api/articles", getArticles)
+app.post("/api/articles", postArticle)
 app.get("/api/articles/:article_id", getArticleById)
 app.patch("/api/articles/:article_id", patchArticleById)
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId)
@@ -32,7 +33,7 @@ app.all("/api/*", (req, res) => {
 // Error handling 
 
 app.use((err, req, res, next) => {
-    const { status, message, code } = err
+    const { status, message, code, detail } = err
     if (status && message) {
         res.status(status).send({ message })
     }
@@ -43,7 +44,12 @@ app.use((err, req, res, next) => {
         res.status(400).send({ message: "Bad request: missing property"})
     }
     if (code === "23503") {
-        res.status(404).send({ message: "User not found"})
+        const errMap = {
+            author: "User",
+            topic: "Topic"
+        }
+        const column = detail.match(/\(.+?\)/)[0].slice(1,-1)
+        res.status(404).send({ message: `${errMap[column]} not found`})
     }
 })
 

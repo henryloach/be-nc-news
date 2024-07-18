@@ -82,6 +82,32 @@ exports.selectArticles = (query) => {
         })
 }
 
+exports.insertArticle = (article) => {
+    const { author, title, body, topic } = article
+
+    return db
+        .query(
+            `INSERT INTO articles (
+                author,
+                title,
+                body,
+                topic
+            )
+            VALUES ( 
+                $1,
+                $2,
+                $3,
+                $4
+            ) 
+            RETURNING *;`,
+            [author, title, body, topic]
+        )
+        .then(({ rows }) => {
+            rows[0].comment_count = 0
+            return rows[0]
+        })
+}
+
 exports.selectArticleById = target_id => {
     return db
         .query(
@@ -250,7 +276,7 @@ exports.selectUserByName = target_name => {
         })
 }
 
-exports.updateCommentById = (target_id, {inc_votes}) => {
+exports.updateCommentById = (target_id, { inc_votes }) => {
     if (inc_votes && Number.isNaN(parseInt(inc_votes))) {
         return Promise.reject({
             status: 400,

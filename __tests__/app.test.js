@@ -172,6 +172,105 @@ describe("/api/articles", () => {
                 })
         })
     })
+
+    describe.only("POST", () => {
+        const validArticle = {
+            author: "lurker",
+            title: "All About Cheese",
+            body: "There are many types of cheese. Most of they are yellow.",
+            topic: "cats"
+        }
+
+        const articleWithNoBody = {
+            author: "lurker",
+            title: "All About Cheese",
+            topic: "cats"
+        }
+
+        const articleWithExtraProperty = {
+            author: "lurker",
+            title: "All About Cheese",
+            body: "There are many types of cheese. Most of they are yellow.",
+            topic: "cats",
+            extraProperty: "foo"
+        }
+
+        const articleWithBadUser = {
+            author: "chris",
+            title: "All About Cheese",
+            body: "There are many types of cheese. Most of they are yellow.",
+            topic: "cats"
+        }
+
+        const articleWithBadTopic = {
+            author: "lurker",
+            title: "All About Cheese",
+            body: "There are many types of cheese. Most of they are yellow.",
+            topic: "food"
+        }
+
+        const expectedResponseObject = {
+            article_id: 14,
+            created_at: expect.any(String),
+            votes: 0,
+            comment_count: 0,
+            author: "lurker",
+            title: "All About Cheese",
+            body: "There are many types of cheese. Most of they are yellow.",
+            topic: "cats",
+            article_img_url: "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
+        }
+
+        test("201: Inserts article to database and responds with posted article.", () => {
+            return request(app)
+                .post("/api/articles")
+                .send(validArticle)
+                .expect(201)
+                .then(({ body: { newArticle } }) => {
+                    expect(newArticle).toMatchObject(expectedResponseObject)
+                })
+        })
+
+        test("400: Required property missing from request object.", () => {
+            return request(app)
+                .post("/api/articles")
+                .send(articleWithNoBody)
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad request: missing property")
+                })
+        })
+
+        test("404: User does not exist.", () => {
+            return request(app)
+                .post("/api/articles")
+                .send(articleWithBadUser)
+                .expect(404)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("User not found")
+                })
+        })
+
+        test("404: Topic does not exist.", () => {
+            return request(app)
+                .post("/api/articles")
+                .send(articleWithBadTopic)
+                .expect(404)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Topic not found")
+                })
+        })
+
+        test("201: Requests with extra properties are proccessed with extra properties ignored.", () => {
+            return request(app)
+                .post("/api/articles")
+                .send(articleWithExtraProperty)
+                .expect(201)
+                .then(({ body: { newArticle } }) => {
+                    expect(newArticle).toMatchObject(expectedResponseObject)
+                })
+        })
+    })
 })
 
 describe("/api/articles/:article_id", () => {
@@ -324,7 +423,7 @@ describe("/api/articles/:article_id/comments", () => {
                 })
         })
 
-        test("200: Responds with an empty array for articles with no comments", () => {
+        test("200: Responds with an empty array for articles with no comments.", () => {
             return request(app)
                 .get("/api/articles/4/comments")
                 .expect(200)
@@ -387,7 +486,7 @@ describe("/api/articles/:article_id/comments", () => {
             created_at: expect.any(String)
         }
 
-        test("201: Inserts comment to database and responds with posted comment", () => {
+        test("201: Inserts comment to database and responds with posted comment.", () => {
             return request(app)
                 .post("/api/articles/9/comments")
                 .send(validComment)
@@ -437,7 +536,7 @@ describe("/api/articles/:article_id/comments", () => {
             ])
         })
 
-        test("404: User does not exist", () => {
+        test("404: User does not exist.", () => {
             return request(app)
                 .post("/api/articles/9/comments")
                 .send(commentWithBadUser)
@@ -461,7 +560,7 @@ describe("/api/articles/:article_id/comments", () => {
 
 describe("/api/users", () => {
     describe("GET", () => {
-        test("200: Responds with an array of all user objects", () => {
+        test("200: Responds with an array of all user objects.", () => {
             return request(app)
                 .get("/api/users")
                 .expect(200)
@@ -507,14 +606,14 @@ describe("/api/users/:username", () => {
 
 describe("/api/comments/:comment_id", () => {
 
-    const expectedResponseObject =   {
+    const expectedResponseObject = {
         comment_id: 2,
         body: "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
         votes: 24,
         author: "butter_bridge",
         article_id: 1,
         created_at: "2020-10-31T03:03:00.000Z",
-      }
+    }
 
     describe("PATCH", () => {
         test("200: Responds with the updated comment.", () => {
@@ -578,7 +677,7 @@ describe("/api/comments/:comment_id", () => {
         })
     })
     describe("DELETE", () => {
-        test("204: Deletes the comment and responds with no content", () => {
+        test("204: Deletes the comment and responds with no content.", () => {
             return request(app)
                 .delete("/api/comments/1")
                 .expect(204)

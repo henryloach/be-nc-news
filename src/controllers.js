@@ -1,4 +1,4 @@
-const { selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId, insertCommentByArticleId, updateArticleById, deleteCommentRowById, selectUsers, selectUserByName, updateCommentById} = require("./models.js")
+const { selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId, insertCommentByArticleId, updateArticleById, deleteCommentRowById, selectUsers, selectUserByName, updateCommentById, insertArticle } = require("./models.js")
 const endpoints = require("../endpoints.json")
 const { articleData } = require("../db/data/test-data/index.js")
 
@@ -20,6 +20,16 @@ exports.getArticles = (req, res, next) => {
     selectArticles(req.query)
         .then(articles => {
             res.status(200).send({ articles })
+        })
+        .catch(err => {
+            next(err)
+        })
+}
+
+exports.postArticle = (req, res, next) => {
+    insertArticle(req.body)
+        .then(newArticle => {
+            res.status(201).send({ newArticle })
         })
         .catch(err => {
             next(err)
