@@ -49,13 +49,14 @@ describe("/api/articles", () => {
             return request(app)
                 .get("/api/articles")
                 .expect(200)
-                .then(({ body: { articles } }) => articles)
+                .then(({ body }) => body)
         }
 
-        test("200: Responds with an array of all article objects.", () => {
+        test("200: Responds with an array of the first 10 article objects.", () => {
             return getArticles()
-                .then(articles => {
-                    expect(articles).toHaveLength(testData.articleData.length)
+                .then(({ articles, total_count }) => {
+                    expect(total_count).toBe(13)
+                    expect(articles).toHaveLength(10)
                     articles.forEach(article => {
                         expect(article).toMatchObject({
                             article_id: expect.any(Number),
@@ -72,14 +73,14 @@ describe("/api/articles", () => {
 
         test("200: Articles are sorted by 'created_at' in descending order.", () => {
             return getArticles()
-                .then(articles => {
+                .then(({ articles, total_count }) => {
                     // TODO - I suspect this passing might be a coincidence ATM, investigate safety of sorting dates as string
                     expect(articles).toBeSortedBy('created_at', { descending: true })
                 })
         })
 
         test("200: Articles do not have a body property.", () => {
-            return getArticles().then(articles => {
+            return getArticles().then(({ articles, total_count }) => {
                 expect(articles.every(article => {
                     return article.hasOwnProperty("body") === false
                 })).toBe(true)
@@ -171,9 +172,29 @@ describe("/api/articles", () => {
                     expect(message).toBe("Bad request: invalid query field")
                 })
         })
+
+        test("200: ?limit=n \tResponds with an array of n atricle objects.", () => {
+            return request(app)
+                .get("/api/articles?limit=5")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toHaveLength(5)
+                })
+        })
+
+        test("200: ?p=n \tResponds with an array of article objects beginning at the n'th.", () => {
+            return request(app)
+                .get("/api/articles?limit=5&p=5&sort_by=article_id&order=asc")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toHaveLength(5)
+                    expect(articles.map( article => article.article_id))
+                    .toStrictEqual([6,7,8,9,10])
+                })
+        })
     })
 
-    describe.only("POST", () => {
+    describe("POST", () => {
         const validArticle = {
             author: "lurker",
             title: "All About Cheese",

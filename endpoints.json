@@ -26,6 +26,14 @@
         "greenlist": null
       },
       {
+        "field": "limit",
+        "greenlist": null
+      },
+      {
+        "field": "p",
+        "greenlist": null
+      },
+      {
         "field": "sort_by",
         "greenlist": [
           "created_at",

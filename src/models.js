@@ -20,11 +20,17 @@ exports.selectArticles = (query) => {
         WHERE table_name = 'articles';`
         )
         .then(({ rows }) => {
-            const { sort_by = 'created_at', order = 'desc', topic = '%' } = query
+            const {
+                sort_by = 'created_at',
+                order = 'desc',
+                topic = '%',
+                p: offset = 0,
+                limit = 10
+            } = query
             const queryParams = { sort_by, order, topic }
 
             // TODO consider parsing greenlists from endpoints.json
-            const allowedFields = ["sort_by", "order", "topic"]
+            const allowedFields = ["sort_by", "order", "topic", "limit", "p"]
             const tableColumns = rows.map(row => row.column_name)
             const guardedQueries = {
                 sort_by: tableColumns,
@@ -51,6 +57,16 @@ exports.selectArticles = (query) => {
                 }
             }
 
+            const totalString = format(
+                `SELECT 
+                    count(article_id) 
+                FROM 
+                    articles 
+                WHERE 
+                    topic LIKE %L;`,
+                topic
+            )
+
             const queryString = format(
                 `SELECT 
                     articles.article_id,
@@ -69,16 +85,20 @@ exports.selectArticles = (query) => {
                 GROUP BY 
                     articles.article_id
                 ORDER BY
-                    articles.%s %s;`,
+                    articles.%s %s
+                LIMIT %s
+                OFFSET %s;`,
                 topic,
                 sort_by,
-                order
+                order,
+                limit,
+                offset
             )
 
-            return db.query(queryString)
+            return Promise.all([db.query(queryString), db.query(totalString)])
         })
-        .then(({ rows }) => {
-            return rows
+        .then(([{ rows : articles }, { rows: total }]) => {
+            return { articles, total_count: total[0].count }
         })
 }
 
