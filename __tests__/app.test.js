@@ -444,6 +444,38 @@ describe("/api/articles/:article_id", () => {
                 })
         })
     })
+
+    describe("DELETE", () => {
+        test("204: Deletes the article and responds with no content.", () => {
+            return request(app)
+                .delete("/api/articles/1")
+                .expect(204)
+                // check it's deleted by trying to delete it again?
+                .then(() => {
+                    return request(app)
+                        .delete("/api/articles/1")
+                        .expect(404)
+                })
+        })
+
+        test("404: Valid article id endpoint not found in database.", () => {
+            return request(app)
+                .delete("/api/articles/999")
+                .expect(404)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("No article matching requested id")
+                })
+        })
+
+        test("400: Malformed article id endpoint.", () => {
+            return request(app)
+                .delete("/api/articles/not-an-endpoint")
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad endpoint")
+                })
+        })
+    })
 })
 
 describe("/api/articles/:article_id/comments", () => {

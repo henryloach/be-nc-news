@@ -13,7 +13,6 @@ exports.selectTopics = () => {
 
 exports.insertTopic = (topic) => {
     const { slug, description } = topic
-    console.log("debug", slug, description);
     return db
         .query(
             `INSERT INTO topics (
@@ -233,6 +232,30 @@ exports.updateArticleById = (target_id, { inc_votes }) => {
         })
         .then(({ rows }) => {
             return rows[0]
+        })
+}
+
+exports.deleteArticleRowById = target_id => {
+    return db
+        .query(
+            `SELECT * FROM articles
+            WHERE article_id = $1;`,
+            [target_id]
+        )
+        .then(({ rows }) => {
+            if (rows.length === 0) {
+                return Promise.reject({
+                    status: 404,
+                    message: "No article matching requested id"
+                })
+            }
+        })
+        .then(() => {
+            return db.query(
+                `DELETE FROM articles
+                WHERE article_id = $1;`,
+                [target_id]
+            )
         })
 }
 
