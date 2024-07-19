@@ -44,13 +44,16 @@ exports.selectArticles = (query) => {
                 sort_by = 'created_at',
                 order = 'desc',
                 topic = '%',
+                author = '%',
                 p: offset = 0,
                 limit = 10
             } = query
             const queryParams = { sort_by, order, topic }
 
+            console.log(author);
+
             // TODO consider parsing greenlists from endpoints.json
-            const allowedFields = ["sort_by", "order", "topic", "limit", "p"]
+            const allowedFields = ["sort_by", "order", "topic", "author", "limit", "p"]
             const tableColumns = rows.map(row => row.column_name)
             const guardedQueries = {
                 sort_by: tableColumns,
@@ -116,6 +119,8 @@ exports.selectArticles = (query) => {
                     articles.article_id = comments.article_id
                 WHERE 
                     articles.topic LIKE %L
+                AND
+                    articles.author LIKE %L
                 GROUP BY 
                     articles.article_id
                 ORDER BY
@@ -123,6 +128,7 @@ exports.selectArticles = (query) => {
                 LIMIT %s
                 OFFSET %s;`,
                 topic,
+                author,
                 sort_by,
                 order,
                 limit,

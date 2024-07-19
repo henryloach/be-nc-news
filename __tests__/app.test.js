@@ -175,6 +175,19 @@ describe("/api/articles", () => {
                 })
         })
 
+        test("200: ?author=icellusedkars \tResponds with articles array filtered by author.", () => {
+            return request(app)
+                .get("/api/articles?author=icellusedkars")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toHaveLength(6)
+                    articles.forEach(article => {
+                        expect(article.author).toBe("icellusedkars")
+                    })
+                })
+        })
+
+        //TODO Maybe shoukld error
         test("200: ?topic=lizards \tResponds with an empty articles array for topic values not in the database.", () => {
             return request(app)
                 .get("/api/articles?topic=lizards")
@@ -291,7 +304,7 @@ describe("/api/articles", () => {
         const articleWithBadTopic = {
             author: "lurker",
             title: "All About Cheese",
-            body: "There are many types of cheese. Most of they are yellow.",
+            body: "There are many types of cheese. Most of them are yellow.",
             topic: "food"
         }
 
@@ -302,7 +315,7 @@ describe("/api/articles", () => {
             comment_count: 0,
             author: "lurker",
             title: "All About Cheese",
-            body: "There are many types of cheese. Most of they are yellow.",
+            body: "There are many types of cheese. Most of them are yellow.",
             topic: "cats",
             article_img_url: "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
         }
