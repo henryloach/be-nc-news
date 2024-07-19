@@ -40,6 +40,24 @@ describe("/api/topics", () => {
                 })
         })
     })
+
+    describe("POST", () => {
+        test("201: posts topic to database and responds with the created topic", () => {
+            return request(app)
+                .post("/api/topics")
+                .send({
+                    slug: "topic name here",
+                    description: "description here"
+                })
+                .expect(201)
+                .then(({ body: { newTopic } }) => {
+                    expect(newTopic).toStrictEqual({
+                        slug: "topic name here",
+                        description: "description here"
+                    })
+                })
+        })
+    })
 })
 
 describe("/api/articles", () => {
@@ -188,8 +206,8 @@ describe("/api/articles", () => {
                 .expect(200)
                 .then(({ body: { articles } }) => {
                     expect(articles).toHaveLength(5)
-                    expect(articles.map( article => article.article_id))
-                    .toStrictEqual([6,7,8,9,10])
+                    expect(articles.map(article => article.article_id))
+                        .toStrictEqual([6, 7, 8, 9, 10])
                 })
         })
 

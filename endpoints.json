@@ -14,6 +14,18 @@
       ]
     }
   },
+  "POST /api/topics": {
+    "description": "adds a topic to the database and responds with the added topic",
+    "queries": [],
+    "exampleRequest": {
+      "slug": "football",
+      "description": "Footie!"
+    },
+    "exampleResponse": {
+      "slug": "football",
+      "description": "Footie!"
+    }
+  },
   "GET /api/articles": {
     "description": "serves an array of all articles",
     "queries": [
@@ -125,7 +137,16 @@
   },
   "GET /api/articles/:article_id/comments": {
     "description": "serves an array containing comments of the article matching the requested id",
-    "queries": [],
+    "queries": [
+      {
+        "field": "limit",
+        "greenlist": null
+      },
+      {
+        "field": "p",
+        "greenlist": null
+      }
+    ],
     "exampleResponse": {
       "comments": [
         {

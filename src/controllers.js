@@ -1,12 +1,12 @@
-const { selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId, insertCommentByArticleId, updateArticleById, deleteCommentRowById, selectUsers, selectUserByName, updateCommentById, insertArticle } = require("./models.js")
+const { selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId, insertCommentByArticleId, updateArticleById, deleteCommentRowById, selectUsers, selectUserByName, updateCommentById, insertArticle, insertTopic } = require("./models.js")
 const endpoints = require("../endpoints.json")
 const { articleData } = require("../db/data/test-data/index.js")
 
-exports.getEndpoints = (req, res) => {
+exports.getEndpoints = (req, res, next) => {
     res.status(200).send({ endpoints })
 }
 
-exports.getTopics = (req, res) => {
+exports.getTopics = (req, res, next) => {
     selectTopics()
         .then(topics => {
             res.status(200).send({ topics })
@@ -14,6 +14,16 @@ exports.getTopics = (req, res) => {
         .catch(err => {
             next(err)
         })
+}
+
+exports.postTopic = (req, res, next) => {
+    insertTopic(req.body)
+    .then(newTopic => {
+        res.status(201).send({ newTopic })
+    })
+    .catch(err => {
+        next(err)
+    })
 }
 
 exports.getArticles = (req, res, next) => {
