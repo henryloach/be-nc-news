@@ -50,8 +50,6 @@ exports.selectArticles = (query) => {
             } = query
             const queryParams = { sort_by, order, topic }
 
-            console.log(author);
-
             // TODO consider parsing greenlists from endpoints.json
             const allowedFields = ["sort_by", "order", "topic", "author", "limit", "p"]
             const tableColumns = rows.map(row => row.column_name)

@@ -276,7 +276,7 @@ describe("/api/articles", () => {
         const validArticle = {
             author: "lurker",
             title: "All About Cheese",
-            body: "There are many types of cheese. Most of they are yellow.",
+            body: "There are many types of cheese. Most of them are yellow.",
             topic: "cats"
         }
 
@@ -289,7 +289,7 @@ describe("/api/articles", () => {
         const articleWithExtraProperty = {
             author: "lurker",
             title: "All About Cheese",
-            body: "There are many types of cheese. Most of they are yellow.",
+            body: "There are many types of cheese. Most of them are yellow.",
             topic: "cats",
             extraProperty: "foo"
         }
@@ -297,7 +297,7 @@ describe("/api/articles", () => {
         const articleWithBadUser = {
             author: "chris",
             title: "All About Cheese",
-            body: "There are many types of cheese. Most of they are yellow.",
+            body: "There are many types of cheese. Most of them are yellow.",
             topic: "cats"
         }
 
