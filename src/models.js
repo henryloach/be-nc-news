@@ -57,6 +57,20 @@ exports.selectArticles = (query) => {
                 }
             }
 
+            if (limit && Number.isNaN(parseInt(limit))) {
+                return Promise.reject({
+                    status: 400,
+                    message: "Bad request: 'limit' value must be a number"
+                })
+            }
+        
+            if (offset && Number.isNaN(parseInt(offset))) {
+                return Promise.reject({
+                    status: 400,
+                    message: "Bad request: 'p' value must be a number"
+                })
+            }
+
             const totalString = format(
                 `SELECT 
                     count(article_id) 
@@ -97,7 +111,7 @@ exports.selectArticles = (query) => {
 
             return Promise.all([db.query(queryString), db.query(totalString)])
         })
-        .then(([{ rows : articles }, { rows: total }]) => {
+        .then(([{ rows: articles }, { rows: total }]) => {
             return { articles, total_count: total[0].count }
         })
 }
@@ -201,7 +215,39 @@ exports.updateArticleById = (target_id, { inc_votes }) => {
         })
 }
 
-exports.selectCommentsByArticleId = target_id => {
+exports.selectCommentsByArticleId = (target_id, query) => {
+    const {
+        p: offset = 0,
+        limit = 10
+    } = query
+
+    // TODO consider parsing greenlists from endpoints.json
+    const allowedFields = ["limit", "p"]
+
+    // check fields
+    for (const field in query) {
+        if (!allowedFields.includes(field)) {
+            return Promise.reject({
+                status: 400,
+                message: "Bad request: invalid query field"
+            })
+        }
+    }
+
+    if (limit && Number.isNaN(parseInt(limit))) {
+        return Promise.reject({
+            status: 400,
+            message: "Bad request: 'limit' value must be a number"
+        })
+    }
+
+    if (offset && Number.isNaN(parseInt(offset))) {
+        return Promise.reject({
+            status: 400,
+            message: "Bad request: 'p' value must be a number"
+        })
+    }
+
     // TODO refactor based on tuesdays lecture at some point
     return db
         .query(
@@ -218,15 +264,33 @@ exports.selectCommentsByArticleId = target_id => {
             }
         })
         .then(() => {
-            return db.query(
-                `SELECT * FROM comments
-                WHERE article_id = $1
-                ORDER BY created_at DESC;`,
-                [target_id]
+            const totalString = format(
+                `SELECT 
+                    count(comment_id) 
+                FROM 
+                    comments
+                WHERE 
+                    article_id = %L;`,
+                target_id
             )
+
+            const queryString = format(
+                `SELECT * FROM comments
+                WHERE 
+                    article_id = %L
+                ORDER BY 
+                    created_at DESC
+                LIMIT %s
+                OFFSET %s;`,
+                target_id,
+                limit,
+                offset
+            )
+
+            return Promise.all([db.query(queryString), db.query(totalString)])
         })
-        .then(({ rows }) => {
-            return rows
+        .then(([{ rows: comments }, { rows: total }]) => {
+            return { comments, total_count: total[0].count }
         })
 }
 

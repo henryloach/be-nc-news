@@ -192,6 +192,24 @@ describe("/api/articles", () => {
                     .toStrictEqual([6,7,8,9,10])
                 })
         })
+
+        test("400: Error if 'limit' value cannot be parsed to a number.", () => {
+            return request(app)
+                .get("/api/articles/?limit=cheese")
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad request: 'limit' value must be a number")
+                })
+        })
+
+        test("400: Error if 'p' value cannot be parsed to a number.", () => {
+            return request(app)
+                .get("/api/articles/?p=cheese")
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad request: 'p' value must be a number")
+                })
+        })
     })
 
     describe("POST", () => {
@@ -468,6 +486,52 @@ describe("/api/articles/:article_id/comments", () => {
                 .expect(400)
                 .then(({ body: { message } }) => {
                     expect(message).toBe("Bad endpoint")
+                })
+        })
+
+        test("200: ?limit=n \tResponds with an array of n comment objects.", () => {
+            return request(app)
+                .get("/api/articles/1/comments?limit=5")
+                .expect(200)
+                .then(({ body: { comments } }) => {
+                    expect(comments).toHaveLength(5)
+                })
+        })
+
+        test("200: ?p=n \tResponds with an array of article objects beginning at the n'th.", () => {
+            return request(app)
+                .get("/api/articles/1/comments?limit=5&p=5")
+                .expect(200)
+                .then(({ body: { comments, total_count } }) => {
+                    expect(comments).toHaveLength(5)
+                    expect(total_count).toBe(11)
+                })
+        })
+
+        test("400: ?invalid=anything \tInvalid query field.", () => {
+            return request(app)
+                .get("/api/articles/1/comments?invalid=anything")
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad request: invalid query field")
+                })
+        })
+
+        test("400: Error if 'limit' value cannot be parsed to a number.", () => {
+            return request(app)
+                .get("/api/articles/1/comments?limit=cheese")
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad request: 'limit' value must be a number")
+                })
+        })
+
+        test("400: Error if 'p' value cannot be parsed to a number.", () => {
+            return request(app)
+                .get("/api/articles/1/comments?p=cheese")
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad request: 'p' value must be a number")
                 })
         })
     })
