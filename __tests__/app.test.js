@@ -57,6 +57,35 @@ describe("/api/topics", () => {
                     })
                 })
         })
+
+        test("400: Required property missing from request object.", () => {
+            return request(app)
+                .post("/api/topics")
+                .send({
+                    description: "description here"
+                })
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("Bad request: missing property")
+                })
+        })
+
+        test("201: Requests with extra properties are proccessed with extra properties ignored.", () => {
+            return request(app)
+                .post("/api/topics")
+                .send({
+                    slug: "topic name here",
+                    description: "description here",
+                    extraProperty: "foo"
+                })
+                .expect(201)
+                .then(({ body: { newTopic } }) => {
+                    expect(newTopic).toStrictEqual({
+                        slug: "topic name here",
+                        description: "description here"
+                    })
+                })
+        })
     })
 })
 
