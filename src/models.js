@@ -1,5 +1,7 @@
 const db = require("../db/connection.js")
 const format = require("pg-format")
+const { getEndpointQueryData, getGreenlistMap, selectRowFromTable } = require("./model.ulits.js")
+
 
 exports.selectTopics = () => {
     return db
@@ -11,7 +13,7 @@ exports.selectTopics = () => {
         })
 }
 
-exports.insertTopic = (topic) => {
+exports.insertTopic = topic => {
     const { slug, description } = topic
     return db
         .query(
@@ -31,116 +33,103 @@ exports.insertTopic = (topic) => {
         })
 }
 
-exports.selectArticles = (query) => {
+exports.selectArticles = query => {
+    const {
+        sort_by = 'created_at',
+        order = 'desc',
+        topic = '%',
+        author = '%',
+        p: offset = 0,
+        limit = 10
+    } = query
+    const queryParams = { sort_by, order, topic }
 
-    return db
-        .query(
-            `SELECT column_name
-        FROM information_schema.columns
-        WHERE table_name = 'articles';`
-        )
-        .then(({ rows }) => {
-            const {
-                sort_by = 'created_at',
-                order = 'desc',
-                topic = '%',
-                author = '%',
-                p: offset = 0,
-                limit = 10
-            } = query
-            const queryParams = { sort_by, order, topic }
+    const endpointQueryData = getEndpointQueryData("GET /api/articles")
+    const allowedFields = endpointQueryData.map(query => query.field)
+    const greenlistMap = getGreenlistMap(endpointQueryData)
 
-            // TODO consider parsing greenlists from endpoints.json
-            const allowedFields = ["sort_by", "order", "topic", "author", "limit", "p"]
-            const tableColumns = rows.map(row => row.column_name)
-            const guardedQueries = {
-                sort_by: tableColumns,
-                order: ["asc", "desc"],
-            }
+    // check fields
+    for (const field in query) {
+        if (!allowedFields.includes(field)) {
+            return Promise.reject({
+                status: 400,
+                message: "Bad request: invalid query field"
+            })
+        }
+    }
 
-            // check fields
-            for (const field in query) {
-                if (!allowedFields.includes(field)) {
-                    return Promise.reject({
-                        status: 400,
-                        message: "Bad request: invalid query field"
-                    })
-                }
-            }
+    // check values
+    for (const field in greenlistMap) {
+        if (!greenlistMap[field].includes(queryParams[field])) {
+            return Promise.reject({
+                status: 400,
+                message: `Bad request: invalid ${field} value`
+            })
+        }
+    }
 
-            // check values
-            for (const field in guardedQueries) {
-                if (!guardedQueries[field].includes(queryParams[field])) {
-                    return Promise.reject({
-                        status: 400,
-                        message: `Bad request: invalid ${field} value`
-                    })
-                }
-            }
+    if (limit && Number.isNaN(parseInt(limit))) {
+        return Promise.reject({
+            status: 400,
+            message: "Bad request: 'limit' value must be a number"
+        })
+    }
 
-            if (limit && Number.isNaN(parseInt(limit))) {
-                return Promise.reject({
-                    status: 400,
-                    message: "Bad request: 'limit' value must be a number"
-                })
-            }
+    if (offset && Number.isNaN(parseInt(offset))) {
+        return Promise.reject({
+            status: 400,
+            message: "Bad request: 'p' value must be a number"
+        })
+    }
 
-            if (offset && Number.isNaN(parseInt(offset))) {
-                return Promise.reject({
-                    status: 400,
-                    message: "Bad request: 'p' value must be a number"
-                })
-            }
-
-            const totalString = format(
-                `SELECT 
+    const totalString = format(
+        `SELECT 
                     count(article_id) 
                 FROM 
                     articles 
                 WHERE 
                     topic LIKE %L;`,
-                topic
-            )
+        topic
+    )
 
-            const queryString = format(
-                `SELECT 
-                    articles.article_id,
-                    articles.title,
-                    articles.topic,
-                    articles.author,
-                    articles.created_at,
-                    articles.votes,
-                    COUNT(comment_id) AS comment_count
-                FROM 
-                    articles LEFT JOIN comments
-                ON 
-                    articles.article_id = comments.article_id
-                WHERE 
-                    articles.topic LIKE %L
-                AND
-                    articles.author LIKE %L
-                GROUP BY 
-                    articles.article_id
-                ORDER BY
-                    articles.%s %s
-                LIMIT %s
-                OFFSET %s;`,
-                topic,
-                author,
-                sort_by,
-                order,
-                limit,
-                offset
-            )
+    const queryString = format(
+        `SELECT 
+            articles.article_id,
+            articles.title,
+            articles.topic,
+            articles.author,
+            articles.created_at,
+            articles.votes,
+            COUNT(comment_id) AS comment_count
+        FROM 
+            articles LEFT JOIN comments
+        ON 
+            articles.article_id = comments.article_id
+        WHERE 
+            articles.topic LIKE %L
+        AND
+            articles.author LIKE %L
+        GROUP BY 
+            articles.article_id
+        ORDER BY
+            articles.%s %s
+        LIMIT %s
+        OFFSET %s;`,
+        topic,
+        author,
+        sort_by,
+        order,
+        limit,
+        offset
+    )
 
-            return Promise.all([db.query(queryString), db.query(totalString)])
-        })
+    return Promise.all([db.query(queryString), db.query(totalString)])
         .then(([{ rows: articles }, { rows: total }]) => {
             return { articles, total_count: total[0].count }
         })
 }
 
-exports.insertArticle = (article) => {
+exports.insertArticle = article => {
     const { author, title, body, topic } = article
 
     return db
@@ -209,21 +198,7 @@ exports.updateArticleById = (target_id, { inc_votes }) => {
         })
     }
 
-    // TODO refactor based on tuesdays lecture at some point
-    return db
-        .query(
-            `SELECT * FROM articles
-            WHERE article_id = $1;`,
-            [target_id]
-        )
-        .then(({ rows }) => {
-            if (rows.length === 0) {
-                return Promise.reject({
-                    status: 404,
-                    message: "No article matching requested id"
-                })
-            }
-        })
+    return selectRowFromTable(target_id, 'articles')
         .then(() => {
             return db
                 .query(
@@ -240,20 +215,7 @@ exports.updateArticleById = (target_id, { inc_votes }) => {
 }
 
 exports.deleteArticleRowById = target_id => {
-    return db
-        .query(
-            `SELECT * FROM articles
-            WHERE article_id = $1;`,
-            [target_id]
-        )
-        .then(({ rows }) => {
-            if (rows.length === 0) {
-                return Promise.reject({
-                    status: 404,
-                    message: "No article matching requested id"
-                })
-            }
-        })
+    return selectRowFromTable(target_id, 'articles')
         .then(() => {
             return db.query(
                 `DELETE FROM articles
@@ -269,8 +231,8 @@ exports.selectCommentsByArticleId = (target_id, query) => {
         limit = 10
     } = query
 
-    // TODO consider parsing greenlists from endpoints.json
-    const allowedFields = ["limit", "p"]
+    const endpointQueryData = getEndpointQueryData("GET /api/articles/:article_id/comments")
+    const allowedFields = endpointQueryData.map(query => query.field)
 
     // check fields
     for (const field in query) {
@@ -296,21 +258,7 @@ exports.selectCommentsByArticleId = (target_id, query) => {
         })
     }
 
-    // TODO refactor based on tuesdays lecture at some point
-    return db
-        .query(
-            `SELECT * FROM articles
-            WHERE article_id = $1;`,
-            [target_id]
-        )
-        .then(({ rows }) => {
-            if (rows.length === 0) {
-                return Promise.reject({
-                    status: 404,
-                    message: "No article matching requested id"
-                })
-            }
-        })
+    return selectRowFromTable(target_id, 'articles')
         .then(() => {
             const totalString = format(
                 `SELECT 
@@ -344,21 +292,8 @@ exports.selectCommentsByArticleId = (target_id, query) => {
 
 exports.insertCommentByArticleId = (target_id, comment) => {
     const { username, body } = comment
-    // TODO refactor based on tuesdays lecture at some point
-    return db
-        .query(
-            `SELECT * FROM articles
-            WHERE article_id = $1;`,
-            [target_id]
-        )
-        .then(({ rows }) => {
-            if (rows.length === 0) {
-                return Promise.reject({
-                    status: 404,
-                    message: "No article matching requested id"
-                })
-            }
-        })
+
+    return selectRowFromTable(target_id, 'articles')
         .then(() => {
             return db.query(
                 `INSERT INTO comments (
@@ -415,21 +350,7 @@ exports.updateCommentById = (target_id, { inc_votes }) => {
             message: "Bad request: 'inc_votes' value must be a number"
         })
     }
-    // TODO refactor based on tuesdays lecture at some point
-    return db
-        .query(
-            `SELECT * FROM comments
-            WHERE comment_id = $1;`,
-            [target_id]
-        )
-        .then(({ rows }) => {
-            if (rows.length === 0) {
-                return Promise.reject({
-                    status: 404,
-                    message: "No comment matching requested id"
-                })
-            }
-        })
+    return selectRowFromTable(target_id, 'comments')
         .then(() => {
             return db
                 .query(
@@ -446,20 +367,7 @@ exports.updateCommentById = (target_id, { inc_votes }) => {
 }
 
 exports.deleteCommentRowById = target_id => {
-    return db
-        .query(
-            `SELECT * FROM comments
-            WHERE comment_id = $1;`,
-            [target_id]
-        )
-        .then(({ rows }) => {
-            if (rows.length === 0) {
-                return Promise.reject({
-                    status: 404,
-                    message: "No comment matching requested id"
-                })
-            }
-        })
+    return selectRowFromTable(target_id, 'comments')
         .then(() => {
             return db.query(
                 `DELETE FROM comments

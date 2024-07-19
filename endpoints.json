@@ -30,20 +30,16 @@
     "description": "serves an array of all articles",
     "queries": [
       {
-        "field": "author",
-        "greenlist": null
+        "field": "author"
       },
       {
-        "field": "topic",
-        "greenlist": null
+        "field": "topic"
       },
       {
-        "field": "limit",
-        "greenlist": null
+        "field": "limit"
       },
       {
-        "field": "p",
-        "greenlist": null
+        "field": "p"
       },
       {
         "field": "sort_by",
@@ -139,12 +135,10 @@
     "description": "serves an array containing comments of the article matching the requested id",
     "queries": [
       {
-        "field": "limit",
-        "greenlist": null
+        "field": "limit"
       },
       {
-        "field": "p",
-        "greenlist": null
+        "field": "p"
       }
     ],
     "exampleResponse": {

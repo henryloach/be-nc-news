@@ -38,9 +38,12 @@ app.all("/api/*", (req, res) => {
 
 app.use((err, req, res, next) => {
     const { status, message, code, detail } = err
+    // custom
     if (status && message) {
         res.status(status).send({ message })
     }
+
+    // psql
     if (code === "22P02") {
         res.status(400).send({ message: "Bad endpoint" })
     }
