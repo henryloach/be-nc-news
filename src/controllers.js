@@ -1,6 +1,5 @@
 const { selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId, insertCommentByArticleId, updateArticleById, deleteCommentRowById, selectUsers, selectUserByName, updateCommentById, insertArticle, insertTopic, deleteArticleRowById } = require("./models.js")
 const endpoints = require("../endpoints.json")
-const { articleData } = require("../db/data/test-data/index.js")
 
 exports.getEndpoints = (req, res, next) => {
     res.status(200).send({ endpoints })
@@ -143,4 +142,10 @@ exports.deleteCommentById = (req, res, next) => {
             next(err)
         })
 
+}
+
+exports.handleWildcardEndpoint = (req, res, next) => {
+    const err = new Error("Bad endpoint")
+    err.status = 400
+    next(err)
 }

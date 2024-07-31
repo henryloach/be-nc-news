@@ -1,4 +1,5 @@
-const { getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticleId, postCommentByArticleId, patchArticleById, deleteCommentById, getUsers, getUserByName, patchCommentById, postArticle, postTopic, deleteArticleById } = require("./controllers.js")
+const { handleCustomError, handleMissingPropertyError, handleValidationError, handleForeignKeyError, handleGenericError } = require("./errorHandlers.js")
+const { getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticleId, postCommentByArticleId, patchArticleById, deleteCommentById, getUsers, getUserByName, patchCommentById, postArticle, postTopic, deleteArticleById, handleWildcardEndpoint } = require("./controllers.js")
 
 const express = require("express")
 const app = express()
@@ -28,36 +29,14 @@ app.get("/api/users/:username", getUserByName)
 app.patch("/api/comments/:comment_id", patchCommentById)
 app.delete("/api/comments/:comment_id", deleteCommentById)
 
-//
-
-app.all("/api/*", (req, res) => {
-    res.status(400).send({ message: "Bad endpoint" })
-})
+app.all("/api/*", handleWildcardEndpoint)
 
 // Error handling 
 
-app.use((err, req, res, next) => {
-    const { status, message, code, detail } = err
-    // custom
-    if (status && message) {
-        res.status(status).send({ message })
-    }
-
-    // psql
-    if (code === "22P02") {
-        res.status(400).send({ message: "Bad endpoint" })
-    }
-    if (code === "23502") {
-        res.status(400).send({ message: "Bad request: missing property"})
-    }
-    if (code === "23503") {
-        const errMap = {
-            author: "User",
-            topic: "Topic"
-        }
-        const column = detail.match(/\(.+?\)/)[0].slice(1,-1)
-        res.status(404).send({ message: `${errMap[column]} not found`})
-    }
-})
+app.use(handleCustomError)
+app.use(handleValidationError)
+app.use(handleMissingPropertyError)
+app.use(handleForeignKeyError)
+app.use(handleGenericError)
 
 module.exports = app

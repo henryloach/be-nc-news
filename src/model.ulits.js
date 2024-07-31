@@ -15,7 +15,7 @@ exports.getGreenlistMap = queryData => {
     return resultObj
 }
 
-// maybe call this isRowInTable again, I don't think I use it's resove value ever
+// maybe call this isRowInTable again, I don't think I use its resove value ever
 exports.selectRowFromTable = (target_id, table) => {
     const row = table.slice(0, -1)
     return db
