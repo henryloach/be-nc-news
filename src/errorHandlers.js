@@ -20,7 +20,7 @@ exports.handleMissingPropertyError = (err, req, res, next) => {
     } else {
         next(err)
     }
-};
+}
 
 exports.handleForeignKeyError = (err, req, res, next) => {
     if (err.code === "23503") {

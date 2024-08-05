@@ -2,8 +2,10 @@ const { handleCustomError, handleMissingPropertyError, handleValidationError, ha
 const { getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticleId, postCommentByArticleId, patchArticleById, deleteCommentById, getUsers, getUserByName, patchCommentById, postArticle, postTopic, deleteArticleById, handleWildcardEndpoint } = require("./controllers.js")
 
 const express = require("express")
+const cors = require("cors")
 const app = express()
 
+app.use(cors())
 app.use(express.json())
 
 // Endpoints 
