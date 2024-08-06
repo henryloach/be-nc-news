@@ -99,7 +99,8 @@ exports.selectArticles = query => {
             articles.topic,
             articles.author,
             articles.created_at,
-            articles.votes,
+            articles.votes,                                
+            articles.article_img_url,
             COUNT(comment_id) AS comment_count
         FROM 
             articles LEFT JOIN comments

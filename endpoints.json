@@ -84,15 +84,17 @@
       "topic": "cats"
     },
     "exampleResponse": {
-      "article_id": 14,
-      "created_at": "2018-05-30T15:59:13.341Z",
-      "votes": 0,
-      "comment_count": 0,
-      "author": "lurker",
-      "title": "All About Cheese",
-      "body": "There are many types of cheese. Most of they are yellow.",
-      "topic": "cats",
-      "article_img_url": "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
+      "newArticle" : {
+        "article_id": 14,
+        "created_at": "2018-05-30T15:59:13.341Z",
+        "votes": 0,
+        "comment_count": 0,
+        "author": "lurker",
+        "title": "All About Cheese",
+        "body": "There are many types of cheese. Most of they are yellow.",
+        "topic": "cats",
+        "article_img_url": "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
+      }
     }
   },
   "GET /api/articles/:article_id": {
@@ -162,12 +164,14 @@
       "body": "An elephant never forgets."
     },
     "exampleResponse": {
-      "comment_id": 19,
-      "body": "An elephant never forgets.",
-      "article_id": 9,
-      "author": "lurker",
-      "votes": 0,
-      "created_at": "2018-05-30T15:59:13.341Z"
+      "newComment" : {
+        "comment_id": 19,
+        "body": "An elephant never forgets.",
+        "article_id": 9,
+        "author": "lurker",
+        "votes": 0,
+        "created_at": "2018-05-30T15:59:13.341Z"
+      }
     }
   },
   "DELETE /api/articles/:article_id/comments": {
