@@ -88,8 +88,11 @@ exports.selectArticles = query => {
                 FROM 
                     articles 
                 WHERE 
-                    topic LIKE %L;`,
-        topic
+                    topic LIKE %L
+                AND 
+                    author LIKE %L;`,
+        topic,
+        author
     )
 
     const queryString = format(
