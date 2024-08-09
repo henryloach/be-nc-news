@@ -141,8 +141,10 @@ describe("/api/articles", () => {
             'article_id',
             'author',
             'title',
-            'topic'
+            'topic',
+            'comment_count'
         ]
+
         const orderOptions = ["asc", "desc"]
         const jestOptionMap = {
             asc: { descending: false },

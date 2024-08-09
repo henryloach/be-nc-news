@@ -103,9 +103,9 @@ exports.selectArticles = query => {
             articles.article_img_url,
             COUNT(comment_id) AS comment_count
         FROM 
-            articles LEFT JOIN comments
-        ON 
-            articles.article_id = comments.article_id
+            articles 
+        LEFT JOIN 
+            comments ON articles.article_id = comments.article_id
         WHERE 
             articles.topic LIKE %L
         AND
@@ -113,12 +113,12 @@ exports.selectArticles = query => {
         GROUP BY 
             articles.article_id
         ORDER BY
-            articles.%s %s
+            %s %s
         LIMIT %s
         OFFSET %s;`,
         topic,
         author,
-        sort_by,
+        sort_by === 'comment_count' ? 'comment_count' : `articles.${sort_by}`,
         order,
         limit,
         offset
